@@ -1,49 +1,64 @@
-module PreprocessingStage (
-  input [6:0] a,
-  input [6:0] b,
-  input [6:0] k,
-  output [6:0] g,
-  output [6:0] p,
-  output [6:0] h,
-  output [6:0] g_prim,
-  output [6:0] p_prim,
-  output [6:0] h_prim
+module PreprocessingStage(
+  input wire [6:0] a,
+  input wire [6:0] b,
+  input wire [6:0] k,
+  output reg [6:0] carry_generate_vector,
+  output reg [6:0] carry_propagate_vector,
+  output reg [6:0] half_sum_vector,
+  output reg [6:0] g_prim,
+  output reg [6:0] p_prim,
+  output reg [6:0] h_prim
 );
-  reg [6:0] g_temp, p_temp, h_temp;
-  reg [6:0] g_prim_temp, p_prim_temp, h_prim_temp;
-  reg [6:0] a_prim_temp, b_prim_temp;
-  integer i;
+  reg [6:0] g [0:6];
+  reg [6:0] p [0:6];
+  reg [6:0] h [0:6];
+  reg [6:0] a_prim [0:6];
+  reg [6:0] b_prim [0:6];
 
-  assign g = g_temp;
-  assign p = p_temp;
-  assign h = h_temp;
-  assign g_prim = g_prim_temp;
-  assign p_prim = p_prim_temp;
-  assign h_prim = h_prim_temp;
+  initial begin
+    for (integer k = 6; k >= 0; k = k - 1) begin
+      g[k] = 7'b0;
+      p[k] = 7'b0;
+      h[k] = 7'b0;
+      a_prim[k] = 7'b0;
+      b_prim[k] = 7'b0;
+    end
+  end
 
-  always @(*) begin
-    for (i = 0; i < 7; i = i + 1) begin
-      g_temp[i] = a[i] & b[i];
-      p_temp[i] = a[i] | b[i];
-      h_temp[i] = ~(g_temp[i] & p_temp[i]);
+  always @* begin
+    for (integer i = 6; i >= 0; i = i - 1) begin
+      g[i] = a[i] & b[i];
+      p[i] = a[i] | b[i];
+      h[i] = ((~g[i]) & p[i]);
 
-      if (k[i] == 1) begin
-        a_prim_temp[i] = ~h_temp[i];
-      end else begin
-        a_prim_temp[i] = h_temp[i];
-      end
+      if (k[i] == 0)
+        a_prim[i] = h[i];
+      else
+        a_prim[i] = ~h[i];
 
-      if (i != 6) begin
-        b_prim_temp[i + 1] = (k[i] == 1) ? p_temp[i] : g_temp[i];
+      if (i != 0) begin
+        if (k[i] == 1)
+          b_prim[i - 1] = p[i];
+        else
+          b_prim[i - 1] = g[i];
       end
     end
   end
 
-  always @(*) begin
-    for (i = 0; i < 7; i = i + 1) begin
-      g_prim_temp[i] = a_prim_temp[i] & b_prim_temp[i];
-      p_prim_temp[i] = a_prim_temp[i] | b_prim_temp[i];
-      h_prim_temp[i] = ~(g_prim_temp[i] & p_prim_temp[i]);
+  always @* begin
+    for (integer j = 6; j >= 0; j = j - 1) begin
+      g_prim[j] = a_prim[j] & b_prim[j];
+      p_prim[j] = a_prim[j] | b_prim[j];
+      h_prim[j] = (~g_prim[j] & p_prim[j]);
     end
   end
+
+always @* begin
+  for (integer i = 0; i < 7; i = i + 1) begin
+    carry_generate_vector[i] = g[i];
+    carry_propagate_vector[i] = p[i];
+    half_sum_vector[i] = h[i];
+  end
+end
+
 endmodule
