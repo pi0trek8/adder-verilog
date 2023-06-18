@@ -13,6 +13,10 @@ module main;
   wire [6:0] g_prim;
   wire [6:0] p_prim;
   wire [6:0] h_prim;
+  wire [6:0] carry_generate_vector_out;
+  wire [6:0] carry_propagate_vector_out;
+  wire [6:0] g_prim_out;
+  wire [6:0] p_prim_out;
   wire [6:0] sum_vector;
   
   PreprocessingStage preprocessingStage(
@@ -26,16 +30,16 @@ module main;
     .p_prim(p_prim),
     .h_prim(h_prim)
   );
-  //   ParallelPrefixStage ParallelPrefixStage(
-  //   .carry_generate_vector(carry_generate_vector),
-  //   .carry_propagate_vector(carry_propagate_vector),
-  //   .g_prim(g_prim),
-  //   .p_prim(p_prim),
-  //   .carry_generate_vector_out(carry_generate_vector),
-  //   .carry_propagate_vector_out(carry_propagate_vector),
-  //   .g_prim_out(g_prim),
-  //   .p_prim_out(p_prim)
-  // );
+    ParallelPrefixStage ParallelPrefixStage(
+    .carry_generate_vector(carry_generate_vector),
+    .carry_propagate_vector(carry_propagate_vector),
+    .g_prim(g_prim),
+    .p_prim(p_prim),
+    .carry_generate_vector_out(carry_generate_vector_out),
+    .carry_propagate_vector_out(carry_propagate_vector_out),
+    .g_prim_out(g_prim_out),
+    .p_prim_out(p_prim_out)
+  );
 
   SumComputationStage sumComputationStage(
     .half_sum_vector(half_sum_vector),
@@ -46,8 +50,8 @@ module main;
   );
 
    initial begin
-    first_number_a = 7'b1010101;
-    second_number_b = 7'b1010101;
+    first_number_a = 7'b1111111;
+    second_number_b = 7'b1100000;
     modulo_controller = 7'b0000000;
     #100; // Wait for some time for the computation to finish
     $display("a = %b", first_number_a);
@@ -61,6 +65,15 @@ module main;
     $display("half sum from enveloped cells (h`) = %b", h_prim);
     $display("carry propagate vector from enveloped cells (p`) = %b", p_prim);
     $display("carry generate vector from enveloped cells (g`) = %b", g_prim);
+    $display();
+    $display();
+    $display("half sum vector (h) = %b", half_sum_vector);
+    $display("carry propagate vector (p) = %b", carry_propagate_vector_out);
+    $display("carry generate vector (g) = %b", carry_generate_vector_out);
+    $display();
+    $display("half sum from enveloped cells (h`) = %b", h_prim);
+    $display("carry propagate vector from enveloped cells (p`) = %b", p_prim_out);
+    $display("carry generate vector from enveloped cells (g`) = %b", g_prim_out);
     $display();
     $display("sum vector = %b", sum_vector);
   end

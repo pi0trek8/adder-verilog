@@ -15,6 +15,10 @@ module ParallelPrefixStage(
   reg [6:0] bin_num;
   integer prev_dot;
   initial begin
+    carry_generate_vector_out = 7'b0;
+    carry_propagate_vector_out = 7'b0;
+    g_prim_out = 7'b0;
+    p_prim_out = 7'b0;
     for (integer row_num = 0; row_num < rows; row_num = row_num + 1) begin
       for (integer position = 0; position < length; position = position + 1) begin
 
@@ -59,10 +63,11 @@ module ParallelPrefixStage(
   end
 
   always @* begin
-    carry_generate_vector_out = carry_generate_vector;
-    carry_propagate_vector_out = carry_propagate_vector;
-    g_prim_out = g_prim;
-    p_prim_out = p_prim;
+    for (integer i = 0; i < 7; i = i + 1) begin
+      carry_generate_vector_out[i] = carry_generate_vector[i];
+      carry_propagate_vector_out[i] = carry_propagate_vector[i];
+      g_prim_out[i] = g_prim[i];
+      p_prim_out[i] = p_prim[i];
+    end
   end
-
 endmodule
