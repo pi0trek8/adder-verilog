@@ -44,15 +44,15 @@ module main;
   SumComputationStage sumComputationStage(
     .half_sum_vector(half_sum_vector),
     .h_prim(h_prim),
-    .carry_generate_vector(carry_generate_vector),
-    .g_prim(g_prim),
+    .carry_generate_vector(carry_generate_vector_out),
+    .g_prim(g_prim_out),
     .sum_vector_out(sum_vector)
   );
 
    initial begin
     first_number_a = 7'b1111111;
-    second_number_b = 7'b1100000;
-    modulo_controller = 7'b0000000;
+    second_number_b = 7'b1000000;
+    modulo_controller = 7'b1000000;
     #100; // Wait for some time for the computation to finish
     $display("a = %b", first_number_a);
     $display("b = %b", second_number_b);
